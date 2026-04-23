@@ -82,7 +82,7 @@ function renderTimelapseGrid(date) {
   const container = document.getElementById("media-viewer-content");
   container.innerHTML = `
     <div style="margin-bottom:12px;">
-      <input type="date" id="tl-date" value="${date}" style="background:#0f172a;color:#e2e8f0;border:1px solid #1e293b;padding:6px;border-radius:6px;">
+      <input type="date" id="tl-date" style="background:#0f172a;color:#e2e8f0;border:1px solid #1e293b;padding:6px;border-radius:6px;">
     </div>
     <div id="timelapse-grid"></div>
     <div style="margin-top:12px;display:flex;gap:12px;">
@@ -92,6 +92,7 @@ function renderTimelapseGrid(date) {
     </div>
   `;
 
+  document.getElementById("tl-date").value = date;
   document.getElementById("tl-date").addEventListener("change", (e) => {
     loadTimelapseForDate(e.target.value);
   });
