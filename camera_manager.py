@@ -31,6 +31,15 @@ class CameraConfig:
 
 
 class CameraManager:
+    def _safe_join_under(self, base_dir: str, user_path: str) -> Optional[str]:
+        base_real = os.path.realpath(base_dir)
+        target_real = os.path.realpath(os.path.join(base_real, user_path))
+        try:
+            if os.path.commonpath([base_real, target_real]) != base_real:
+                return None
+        except ValueError:
+            return None
+        return target_real
     def __init__(self, config: Dict[str, dict]):
         self.configs: Dict[str, CameraConfig] = {}
         self.timelapse_threads: Dict[str, threading.Thread] = {}
@@ -186,18 +195,21 @@ class CameraManager:
         cc = self.configs.get(gh_id)
         if not cc:
             return []
-        day_dir = os.path.join(cc.storage_path, "timelapse", date_str)
-        if not os.path.isdir(day_dir):
+        base_dir = os.path.join(cc.storage_path, "timelapse")
+        day_dir = self._safe_join_under(base_dir, date_str)
+        if not day_dir or not os.path.isdir(day_dir):
             return []
         files = sorted(os.listdir(day_dir))
-        return [os.path.join(date_str, f) for f in files if f.lower().endswith(".jpg")]
+        safe_rel_prefix = os.path.relpath(day_dir, os.path.realpath(base_dir))
+        return [os.path.join(safe_rel_prefix, f) for f in files if f.lower().endswith(".jpg")]
 
     def get_timelapse_frame(self, gh_id: str, rel_path: str) -> Optional[bytes]:
         cc = self.configs.get(gh_id)
         if not cc:
             return None
-        full_path = os.path.join(cc.storage_path, "timelapse", rel_path)
-        if not os.path.isfile(full_path):
+        base_dir = os.path.join(cc.storage_path, "timelapse")
+        full_path = self._safe_join_under(base_dir, rel_path)
+        if not full_path or not os.path.isfile(full_path):
             return None
         try:
             with open(full_path, "rb") as f:
