@@ -289,10 +289,21 @@ class CameraManager:
             return None
         base_dir = os.path.join(cc.storage_path, "motion")
         full_path = self._safe_join_under(base_dir, normalized_rel)
-        if not full_path or not os.path.isfile(full_path):
+        if not full_path:
+            return None
+
+        base_real = os.path.realpath(base_dir)
+        full_real = os.path.realpath(full_path)
+        try:
+            if os.path.commonpath([base_real, full_real]) != base_real:
+                return None
+        except ValueError:
+            return None
+
+        if not os.path.isfile(full_real):
             return None
         try:
-            with open(full_path, "rb") as f:
+            with open(full_real, "rb") as f:
                 return f.read()
         except Exception:
             return None
