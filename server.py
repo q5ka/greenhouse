@@ -207,7 +207,10 @@ def api_camera_motion_list(gh: str):
 
 @app.get("/api/camera/motion/video")
 def api_camera_motion_video(gh: str, path: str):
-    data = camera_manager.get_motion_video(gh, path)
+    normalized_path = camera_manager._validate_rel_media_path(path, (".mp4",))
+    if not normalized_path:
+        raise HTTPException(status_code=400, detail="Invalid path")
+    data = camera_manager.get_motion_video(gh, normalized_path)
     if not data:
         raise HTTPException(status_code=404, detail="Not found")
     return Response(content=data, media_type="video/mp4")
