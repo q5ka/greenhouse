@@ -54,6 +54,9 @@ class CameraManager:
             or normalized_rel.startswith("./")
         ):
             return None
+        parts = normalized_rel.split("/")
+        if any(p in ("", ".", "..") for p in parts):
+            return None
         if not re.fullmatch(r"[A-Za-z0-9_\-./]+", normalized_rel):
             return None
         if not normalized_rel.lower().endswith(exts):
