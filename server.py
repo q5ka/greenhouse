@@ -193,7 +193,10 @@ def api_camera_timelapse_list(gh: str, date: str):
 
 @app.get("/api/camera/timelapse/frame")
 def api_camera_timelapse_frame(gh: str, path: str):
-    data = camera_manager.get_timelapse_frame(gh, path)
+    normalized_path = camera_manager._validate_rel_media_path(path, (".jpg", ".jpeg"))
+    if not normalized_path:
+        raise HTTPException(status_code=400, detail="Invalid path")
+    data = camera_manager.get_timelapse_frame(gh, normalized_path)
     if not data:
         raise HTTPException(status_code=404, detail="Not found")
     return Response(content=data, media_type="image/jpeg")

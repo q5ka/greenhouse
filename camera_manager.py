@@ -51,6 +51,7 @@ class CameraManager:
             or normalized_rel.startswith("../")
             or "/../" in normalized_rel
             or normalized_rel.startswith("/")
+            or normalized_rel.startswith("./")
         ):
             return None
         if not re.fullmatch(r"[A-Za-z0-9_\-./]+", normalized_rel):
