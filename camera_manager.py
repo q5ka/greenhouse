@@ -33,8 +33,22 @@ class CameraConfig:
 
 class CameraManager:
     def _safe_join_under(self, base_dir: str, user_path: str) -> Optional[str]:
+        if not isinstance(user_path, str) or not user_path:
+            return None
+
+        normalized_user = os.path.normpath(user_path).replace("\\", "/")
+        if (
+            normalized_user in (".", "..")
+            or os.path.isabs(normalized_user)
+            or normalized_user.startswith("../")
+            or "/../" in normalized_user
+            or normalized_user.startswith("/")
+            or normalized_user.startswith("./")
+        ):
+            return None
+
         base_real = os.path.realpath(base_dir)
-        target_real = os.path.realpath(os.path.join(base_real, user_path))
+        target_real = os.path.realpath(os.path.join(base_real, normalized_user))
         try:
             if os.path.commonpath([base_real, target_real]) != base_real:
                 return None
