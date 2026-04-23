@@ -251,8 +251,21 @@ class CameraManager:
         cc = self.configs.get(gh_id)
         if not cc:
             return None
+        if not rel_path:
+            return None
+        normalized_rel = os.path.normpath(rel_path).replace("\\", "/")
+        if (
+            os.path.isabs(normalized_rel)
+            or normalized_rel.startswith("../")
+            or normalized_rel == ".."
+            or "/../" in normalized_rel
+            or normalized_rel.startswith("/")
+        ):
+            return None
+        if not normalized_rel.lower().endswith(".mp4"):
+            return None
         base_dir = os.path.join(cc.storage_path, "motion")
-        full_path = self._safe_join_under(base_dir, rel_path)
+        full_path = self._safe_join_under(base_dir, normalized_rel)
         if not full_path or not os.path.isfile(full_path):
             return None
         try:
