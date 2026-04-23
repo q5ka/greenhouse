@@ -192,7 +192,10 @@ def api_camera_timelapse_list(gh: str, date: str):
 
 
 @app.get("/api/camera/timelapse/frame")
-def api_camera_timelapse_frame(gh: str, path: str):
+def api_camera_timelapse_frame(
+    gh: str,
+    path: str = Query(..., pattern=r"^[A-Za-z0-9_.-]+(?:/[A-Za-z0-9_.-]+)*$"),
+):
     normalized_path = camera_manager._validate_rel_media_path(path, (".jpg", ".jpeg"))
     if not normalized_path:
         raise HTTPException(status_code=400, detail="Invalid path")
@@ -209,7 +212,10 @@ def api_camera_motion_list(gh: str):
 
 
 @app.get("/api/camera/motion/video")
-def api_camera_motion_video(gh: str, path: str):
+def api_camera_motion_video(
+    gh: str,
+    path: str = Query(..., pattern=r"^[A-Za-z0-9_.-]+(?:/[A-Za-z0-9_.-]+)*$"),
+):
     normalized_path = camera_manager._validate_rel_media_path(path, (".mp4",))
     if not normalized_path:
         raise HTTPException(status_code=400, detail="Invalid path")
