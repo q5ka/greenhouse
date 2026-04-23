@@ -238,8 +238,9 @@ class CameraManager:
         cc = self.configs.get(gh_id)
         if not cc:
             return None
-        full_path = os.path.join(cc.storage_path, "motion", rel_path)
-        if not os.path.isfile(full_path):
+        base_dir = os.path.join(cc.storage_path, "motion")
+        full_path = self._safe_join_under(base_dir, rel_path)
+        if not full_path or not os.path.isfile(full_path):
             return None
         try:
             with open(full_path, "rb") as f:
