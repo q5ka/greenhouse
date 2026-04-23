@@ -215,6 +215,8 @@ class CameraManager:
         cc = self.configs.get(gh_id)
         if not cc:
             return []
+        if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", date_str):
+            return []
         base_dir = os.path.join(cc.storage_path, "timelapse")
         day_dir = self._safe_join_under(base_dir, date_str)
         if not day_dir or not os.path.isdir(day_dir):
