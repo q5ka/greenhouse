@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Greenhouse Config</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #111827;
+      color: #e5e7eb;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: #020617;
+      border-bottom: 1px solid #1f2937;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+    .gh-selector {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    select, input, textarea {
+      background: #111827;
+      color: #e5e7eb;
+      border: 1px solid #374151;
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 0.9rem;
+    }
+    main {
+      padding: 12px 16px 24px;
+    }
+    .section {
+      background: #020617;
+      border-radius: 8px;
+      border: 1px solid #1f2937;
+      padding: 10px 12px;
+      margin-bottom: 12px;
+    }
+    .section h2 {
+      margin: 0 0 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+    .field {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 4px 0;
+      font-size: 0.85rem;
+    }
+    .field label {
+      margin-right: 8px;
+      color: #9ca3af;
+      flex: 1;
+    }
+    .field input, .field select {
+      flex: 1;
+    }
+    button {
+      background: #2563eb;
+      color: #e5e7eb;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 12px;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+    button:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+    .small {
+      font-size: 0.75rem;
+      color: #9ca3af;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Greenhouse Config</h1>
+    <div class="gh-selector">
+      <span class="small">Greenhouse:</span>
+      <select id="gh-select">
+        <option value="main">Main</option>
+        <option value="little_one">Little One</option>
+      </select>
+    </div>
+  </header>
+
+  <main>
+    <div id="capabilities-section" class="section">
+      <h2>Capabilities</h2>
+      <div class="field">
+        <label for="cap_vents">Vents</label>
+        <input type="number" id="cap_vents" min="0" />
+      </div>
+      <div class="field">
+        <label for="cap_irrigation_zones">Irrigation Zones</label>
+        <input type="number" id="cap_irrigation_zones" min="0" />
+      </div>
+      <div class="field">
+        <label for="cap_presence">Presence</label>
+        <select id="cap_presence">
+          <option value="true">Enabled</option>
+          <option value="false">Disabled</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="cap_lighting">Lighting</label>
+        <select id="cap_lighting">
+          <option value="true">Enabled</option>
+          <option value="false">Disabled</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="cap_weather">Weather</label>
+        <select id="cap_weather">
+          <option value="true">Enabled</option>
+          <option value="false">Disabled</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="cap_camera">Camera</label>
+        <select id="cap_camera">
+          <option value="true">Enabled</option>
+          <option value="false">Disabled</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="camera-section" class="section" style="display:none;">
+      <h2>Camera</h2>
+      <div class="field">
+        <label for="cam_enabled">Enabled</label>
+        <select id="cam_enabled">
+          <option value="true">Yes</option>
+          <option value="false">No</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="cam_ip">ESP32 IP</label>
+        <input type="text" id="cam_ip" />
+      </div>
+      <div class="field">
+        <label for="cam_mode">Mode</label>
+        <select id="cam_mode">
+          <option value="live">live</option>
+          <option value="timelapse">timelapse</option>
+          <option value="motion">motion</option>
+          <option value="live_timelapse">live_timelapse</option>
+          <option value="live_motion">live_motion</option>
+          <option value="timelapse_motion">timelapse_motion</option>
+          <option value="live_timelapse_motion">live_timelapse_motion</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="cam_snapshot_interval">Snapshot Interval (s)</label>
+        <input type="number" id="cam_snapshot_interval" min="1" />
+      </div>
+      <div class="field">
+        <label for="cam_motion_sensitivity">Motion Sensitivity (0–1)</label>
+        <input type="number" id="cam_motion_sensitivity" min="0" max="1" step="0.01" />
+      </div>
+      <div class="field">
+        <label for="cam_record_duration">Record Duration (s)</label>
+        <input type="number" id="cam_record_duration" min="1" />
+      </div>
+      <div class="field">
+        <label for="cam_storage_path">Storage Path</label>
+        <input type="text" id="cam_storage_path" />
+      </div>
+      <div class="field">
+        <label for="cam_use_pir">Use PIR MQTT</label>
+        <select id="cam_use_pir">
+          <option value="true">Yes</option>
+          <option value="false">No</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="cam_use_sw">Use Software Motion</label>
+        <select id="cam_use_sw">
+          <option value="true">Yes</option>
+          <option value="false">No</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="margin-top:12px;">
+      <button id="save-btn">Save</button>
+      <span id="status" class="small"></span>
+    </div>
+  </main>
+
+  <script>
+    const ghSelect = document.getElementById('gh-select');
+    const statusEl = document.getElementById('status');
+
+    const capVents = document.getElementById('cap_vents');
+    const capIrr = document.getElementById('cap_irrigation_zones');
+    const capPresence = document.getElementById('cap_presence');
+    const capLighting = document.getElementById('cap_lighting');
+    const capWeather = document.getElementById('cap_weather');
+    const capCamera = document.getElementById('cap_camera');
+
+    const camSection = document.getElementById('camera-section');
+    const camEnabled = document.getElementById('cam_enabled');
+    const camIp = document.getElementById('cam_ip');
+    const camMode = document.getElementById('cam_mode');
+    const camSnapshot = document.getElementById('cam_snapshot_interval');
+    const camSens = document.getElementById('cam_motion_sensitivity');
+    const camRecord = document.getElementById('cam_record_duration');
+    const camPath = document.getElementById('cam_storage_path');
+    const camUsePir = document.getElementById('cam_use_pir');
+    const camUseSw = document.getElementById('cam_use_sw');
+
+    let currentConfig = null;
+
+    async function loadConfig() {
+      const gh = ghSelect.value;
+      statusEl.textContent = 'Loading...';
+      const res = await fetch(`/api/config?gh=${gh}`);
+      currentConfig = await res.json();
+      statusEl.textContent = '';
+
+      const caps = currentConfig.capabilities || {};
+      capVents.value = caps.vents ?? 0;
+      capIrr.value = caps.irrigation_zones ?? 0;
+      capPresence.value = String(!!caps.has_presence);
+      capLighting.value = String(!!caps.has_lighting);
+      capWeather.value = String(!!caps.has_weather);
+      capCamera.value = String(!!caps.has_camera);
+
+      if (caps.has_camera) {
+        camSection.style.display = '';
+        const cam = currentConfig.camera || {};
+        camEnabled.value = String(!!cam.enabled);
+        camIp.value = cam.esp32_ip || '';
+        camMode.value = cam.mode || 'live';
+        camSnapshot.value = cam.snapshot_interval ?? 60;
+        camSens.value = cam.motion_sensitivity ?? 0.25;
+        camRecord.value = cam.record_duration ?? 10;
+        camPath.value = cam.storage_path || `/data/camera/${gh}`;
+        camUsePir.value = String(cam.use_pir_mqtt ?? true);
+        camUseSw.value = String(cam.use_software_motion ?? true);
+      } else {
+        camSection.style.display = 'none';
+      }
+    }
+
+    async function saveConfig() {
+      if (!currentConfig) return;
+      const gh = ghSelect.value;
+
+      const caps = currentConfig.capabilities || {};
+      caps.vents = parseInt(capVents.value || '0', 10);
+      caps.irrigation_zones = parseInt(capIrr.value || '0', 10);
+      caps.has_presence = capPresence.value === 'true';
+      caps.has_lighting = capLighting.value === 'true';
+      caps.has_weather = capWeather.value === 'true';
+      caps.has_camera = capCamera.value === 'true';
+      currentConfig.capabilities = caps;
+
+      if (caps.has_camera) {
+        currentConfig.camera = currentConfig.camera || {};
+        currentConfig.camera.enabled = camEnabled.value === 'true';
+        currentConfig.camera.esp32_ip = camIp.value || null;
+        currentConfig.camera.mode = camMode.value;
+        currentConfig.camera.snapshot_interval = parseInt(camSnapshot.value || '60', 10);
+        currentConfig.camera.motion_sensitivity = parseFloat(camSens.value || '0.25');
+        currentConfig.camera.record_duration = parseInt(camRecord.value || '10', 10);
+        currentConfig.camera.storage_path = camPath.value || `/data/camera/${gh}`;
+        currentConfig.camera.use_pir_mqtt = camUsePir.value === 'true';
+        currentConfig.camera.use_software_motion = camUseSw.value === 'true';
+      } else {
+        delete currentConfig.camera;
+      }
+
+      statusEl.textContent = 'Saving...';
+      const res = await fetch(`/api/config?gh=${encodeURIComponent(gh)}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(currentConfig)
+      });
+      if (res.ok) {
+        statusEl.textContent = 'Saved.';
+      } else {
+        statusEl.textContent = 'Error saving config.';
+      }
+    }
+
+    ghSelect.addEventListener('change', loadConfig);
+    document.getElementById('save-btn').addEventListener('click', saveConfig);
+
+    loadConfig();
+  </script>
+</body>
+</html>

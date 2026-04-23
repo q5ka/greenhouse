@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Greenhouse Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #111827;
+      color: #e5e7eb;
+    }
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: #020617;
+      border-bottom: 1px solid #1f2937;
+      gap: 8px;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+    .gh-selector {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    select {
+      background: #111827;
+      color: #e5e7eb;
+      border: 1px solid #374151;
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 0.9rem;
+    }
+    main {
+      padding: 12px 16px 24px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+    @media (max-width: 900px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .card {
+      background: #020617;
+      border-radius: 8px;
+      border: 1px solid #1f2937;
+      padding: 10px 12px;
+    }
+    .card h2 {
+      margin: 0 0 6px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+    .card h3 {
+      margin: 0 0 4px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.8rem;
+      padding: 2px 6px;
+      border-radius: 999px;
+      background: #111827;
+      border: 1px solid #1f2937;
+    }
+    .status-ok { color: #22c55e; }
+    .status-warn { color: #eab308; }
+    .status-bad { color: #ef4444; }
+
+    .kv-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      margin: 2px 0;
+    }
+    .kv-row span:first-child {
+      color: #9ca3af;
+    }
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1px 6px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      border: 1px solid #374151;
+      background: #020617;
+    }
+    .small {
+      font-size: 0.75rem;
+      color: #9ca3af;
+    }
+
+    .health-overview-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 4px;
+    }
+    .health-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      background: #020617;
+      border: 1px solid #1f2937;
+    }
+  </style>
+</head>
+
+<link rel="stylesheet" href="/static/viewer.css">
+<script src="/static/viewer.js"></script>
+
+<!-- Modal Overlay -->
+<div id="media-viewer-overlay">
+  <div id="media-viewer-modal">
+    <div id="media-viewer-header">
+      <div id="media-viewer-title">Media Viewer</div>
+      <div id="media-viewer-close" onclick="closeMediaViewer()">✕</div>
+    </div>
+
+    <div id="media-viewer-tabs">
+      <div id="tab-timelapse" class="media-tab active" onclick="setActiveTab('timelapse')">Time‑Lapse</div>
+      <div id="tab-motion" class="media-tab" onclick="setActiveTab('motion')">Motion Clips</div>
+    </div>
+
+    <div id="media-viewer-content"></div>
+  </div>
+</div>
+
+<!-- Lightbox -->
+<div id="lightbox-overlay" onclick="closeLightbox()">
+  <div id="lightbox-container" onclick="event.stopPropagation()">
+    <img id="lightbox-img" src="">
+    <div class="lightbox-controls">
+      <button class="lightbox-btn" onclick="prevFrame()">◀</button>
+      <button class="lightbox-btn" onclick="zoomOut()">−</button>
+      <button class="lightbox-btn" onclick="zoomIn()">+</button>
+      <button class="lightbox-btn" onclick="rotateLeft()">⟲</button>
+      <button class="lightbox-btn" onclick="rotateRight()">⟳</button>
+      <button class="lightbox-btn" onclick="downloadFrame()">⬇</button>
+      <button class="lightbox-btn" onclick="nextFrame()">▶</button>
+    </div>
+  </div>
+</div>
+
+<body>
+  <nav id="top-nav" style="
+      width: 100%;
+      background: #1b4332;
+      padding: 12px 0;
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      font-size: 18px;
+      border-bottom: 2px solid #2d6a4f;
+      ">
+    <a href="/static/config.html" style="color: #d8f3dc; text-decoration: none;">⚙️ Config</a>
+  </nav>
+  <header>
+    <h1>Greenhouse Control</h1>
+    <div class="gh-selector">
+      <span class="small">Greenhouse:</span>
+      <select id="gh-select">
+        <option value="main">Main Greenhouse</option>
+        <option value="little_one">Little One</option>
+      </select>
+    </div>
+  </header>
+
+  <main>
+    <!-- ============================
+     SYSTEM HEALTH SUMMARY BAR
+     ============================ -->
+    <div id="system-health-summary" style="
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    ">
+      <div class="status-pill" id="sum-main">Main Loop: --</div>
+      <div class="status-pill" id="sum-mqtt">MQTT: --</div>
+      <div class="status-pill" id="sum-weather">Weather: --</div>
+      <div class="status-pill" id="sum-cameras">Cameras: --</div>
+    </div>
+
+    <!-- System Overview -->
+    <section class="card" id="overview-card">
+  <h2>
+    System Overview
+    <span class="small" id="overview-updated"></span>
+  </h2>
+  <div class="health-overview-list" id="overview-list"></div>
+</section>
+
+<!-- ============================
+     SYSTEM HEALTH CARD (NEW)
+     ============================ -->
+<section class="card" id="system-health-card">
+  <h2>System Health</h2>
+
+  <div class="kv-row">
+    <span>Main Loop</span>
+    <span id="health-main">--</span>
+  </div>
+
+  <div class="kv-row">
+    <span>MQTT</span>
+    <span id="health-mqtt">--</span>
+  </div>
+
+  <div class="kv-row">
+    <span>Weather</span>
+    <span id="health-weather">--</span>
+  </div>
+
+  <div class="kv-row">
+    <span>Cameras</span>
+    <span id="health-cameras">--</span>
+  </div>
+</section>
+
+<div id="dynamic-sections"></div>
+
+  </main>
+
+  <script>
+    const ghSelect = document.getElementById('gh-select');
+    const dynamicSections = document.getElementById('dynamic-sections');
+
+    async function fetchCaps(gh) {
+      return fetch(`/api/capabilities?gh=${gh}`).then(r => r.json());
+    }
+    async function fetchState(gh) {
+      return fetch(`/api/state?gh=${gh}`).then(r => r.json());
+    }
+    async function fetchHealth(gh) {
+      return fetch(`/api/health?gh=${gh}`).then(r => r.json());
+    }
+    async function fetchAllHealth() {
+      const ids = ['main', 'little_one'];
+      const out = {};
+      for (const gh of ids) {
+        try {
+          out[gh] = await fetchHealth(gh);
+        } catch {}
+      }
+      return out;
+    }
+    async function updateSystemHealth() {
+      try {
+        const res = await fetch("/api/health/full");
+        const data = await res.json();
+
+        document.getElementById("health-main").textContent = healthIcon(data.main_loop);
+        document.getElementById("health-mqtt").textContent = healthIcon(data.mqtt);
+        document.getElementById("health-weather").textContent = healthIcon(data.weather);
+
+        const camStatuses = Object.entries(data.cameras)
+          .map(([gh, status]) => `${gh}: ${healthIcon(status)}`)
+          .join("   ");
+
+        document.getElementById("health-cameras").textContent = camStatuses;
+
+      } catch (err) {
+        console.error("Health fetch error:", err);
+        document.getElementById("health-main").textContent = "🔴";
+        document.getElementById("health-mqtt").textContent = "🔴";
+        document.getElementById("health-weather").textContent = "🔴";
+        document.getElementById("health-cameras").textContent = "🔴";
+      }
+    }
+    async function updateSystemHealthSummary() {
+       try {
+        const res = await fetch("/api/health/full");
+        const data = await res.json();
+
+        document.getElementById("sum-main").innerHTML =
+          `Main Loop: ${healthIcon(data.main_loop)}`;
+
+        document.getElementById("sum-mqtt").innerHTML =
+          `MQTT: ${healthIcon(data.mqtt)}`;
+
+        document.getElementById("sum-weather").innerHTML =
+          `Weather: ${healthIcon(data.weather)}`;
+
+        const camStatuses = Object.entries(data.cameras)
+          .map(([gh, status]) => `${gh}: ${healthIcon(status)}`)
+          .join(" &nbsp;&nbsp; ");
+
+        document.getElementById("sum-cameras").innerHTML =
+          `Cameras: ${camStatuses}`;
+
+      } catch (err) {
+        console.error("Health summary error:", err);
+        document.getElementById("sum-main").innerHTML = "Main Loop: 🔴";
+        document.getElementById("sum-mqtt").innerHTML = "MQTT: 🔴";
+        document.getElementById("sum-weather").innerHTML = "Weather: 🔴";
+        document.getElementById("sum-cameras").innerHTML = "Cameras: 🔴";
+      }
+    }
+
+
+    function healthIcon(status) {
+      switch (status) {
+        case "OK": return "🟢";
+        case "STALE": return "🟡";
+        case "MISSING": return "🔴";
+        default: return "⚪";
+      }
+    }
+
+    function healthIcon(status) {
+      switch (status) {
+        case "OK": return "🟢";
+        case "STALE": return "🟡";
+        case "MISSING": return "🔴";
+        default: return "⚪";
+      }
+    }
+
+    function statusPill(ok) {
+      if (ok) return `<span class="status-pill status-ok"><span>🟢</span><span>OK</span></span>`;
+      return `<span class="status-pill status-bad"><span>🔴</span><span>Issue</span></span>`;
+    }
+
+    function buildClimateCard(caps) {
+      return `
+        <div class="card" id="climate-card">
+          <h2>Climate ${statusPill(true)}</h2>
+          <div class="kv-row"><span>Zone 1 Temp</span><span id="t_z1">--</span></div>
+          <div class="kv-row"><span>Zone 1 Humidity</span><span id="h_z1">--</span></div>
+          <div class="kv-row"><span>Zone 2 Temp</span><span id="t_z2">--</span></div>
+          <div class="kv-row"><span>Zone 2 Humidity</span><span id="h_z2">--</span></div>
+          <div class="kv-row"><span>Outside Temp</span><span id="t_out">--</span></div>
+          <div class="kv-row"><span>Outside Humidity</span><span id="h_out">--</span></div>
+          <div class="kv-row"><span>Light</span><span id="light">--</span></div>
+        </div>
+      `;
+    }
+
+    function buildVentCard(caps) {
+      if (caps.vents === 0) return '';
+      let ventRows = '';
+      for (let v = 1; v <= caps.vents; v++) {
+        ventRows += `<span class="tag" id="vent${v}_state_tag">V${v}: --</span> `;
+      }
+      return `
+        <div class="card" id="vent-card">
+          <h2>Vents ${statusPill(true)}</h2>
+          <div class="kv-row"><span>Vent States</span><span>${ventRows}</span></div>
+        </div>
+      `;
+    }
+
+    function buildIrrigationCard(caps) {
+      let rows = '';
+      for (let i = 1; i <= caps.irrigation_zones; i++) {
+        rows += `<div class="kv-row"><span>Moisture Z${i}</span><span id="moisture_z${i}">--</span></div>`;
+      }
+      return `
+        <div class="card" id="irrigation-card">
+          <h2>Irrigation ${statusPill(true)}</h2>
+          <div class="kv-row"><span>State</span><span id="irrigation_state">--</span></div>
+          <div class="kv-row"><span>Active Zone</span><span id="irrigation_zone">--</span></div>
+          ${rows}
+        </div>
+      `;
+    }
+
+    function buildPresenceCard(caps) {
+      if (!caps.has_presence) return '';
+      return `
+        <div class="card" id="presence-card">
+          <h2>Presence</h2>
+          <div class="kv-row"><span>Presence</span><span id="presence">--</span></div>
+        </div>
+      `;
+    }
+
+    function buildLightingCard(caps) {
+      if (!caps.has_lighting) return '';
+      return `
+        <div class="card" id="lighting-card">
+          <h2>Lighting</h2>
+          <div class="kv-row"><span>Lights</span><span id="lights_state_tag">--</span></div>
+          <div class="kv-row"><span>Today Light Minutes</span><span id="light_minutes_today">--</span></div>
+          <div class="kv-row"><span>Target Minutes</span><span id="light_minutes_target">--</span></div>
+        </div>
+      `;
+    }
+
+    function buildWeatherCard(caps) {
+      if (!caps.has_weather) return '';
+      return `
+        <div class="card" id="weather-card">
+          <h2>Weather <span class="small" id="weather-updated">--</span></h2>
+          <div class="kv-row"><span>Temp Min/Max</span><span id="w_temp_minmax">--</span></div>
+          <div class="kv-row"><span>Humidity Min/Max</span><span id="w_hum_minmax">--</span></div>
+          <div class="kv-row"><span>Clouds Avg</span><span id="w_clouds_avg">--</span></div>
+          <div class="kv-row"><span>Rain Chance Max</span><span id="w_pop_max">--</span></div>
+        </div>
+      `;
+    }
+
+    function buildCameraCard(caps) {
+  if (!caps.has_camera) return '';
+  return `
+    <div class="card" id="camera-card">
+      <h2>Camera</h2>
+      <div class="kv-row">
+        <span>Live View</span>
+        <span><img id="cam_live_img" src="" style="max-width:100%; border-radius:4px; border:1px solid #1f2937;" /></span>
+      </div>
+      <div class="kv-row">
+        <span>Time-lapse</span>
+        <span><button id="btn_show_timelapse">View</button></span>
+      </div>
+      <div class="kv-row">
+        <span>Motion Clips</span>
+        <span><button id="btn_show_motion">View</button></span>
+      </div>
+    </div>
+  `;
+}
+
+
+    function buildLayout(caps) {
+      dynamicSections.innerHTML = `
+        <div class="grid">
+          ${buildClimateCard(caps)}
+          ${buildVentCard(caps)}
+        </div>
+
+        <div style="height: 12px;"></div>
+
+        <div class="grid">
+          ${buildIrrigationCard(caps)}
+          ${buildPresenceCard(caps)}
+        </div>
+
+        <div style="height: 12px;"></div>
+
+        <div class="grid">
+          ${buildLightingCard(caps)}
+          ${buildWeatherCard(caps)}
+        </div>
+
+        <div style="height: 12px;"></div>
+
+        ${buildCameraCard(caps)}
+      `;
+    }
+
+    function updateOverview(healthMap) {
+      const list = document.getElementById('overview-list');
+      const updated = document.getElementById('overview-updated');
+      list.innerHTML = '';
+      updated.textContent = 'Updated ' + new Date().toLocaleTimeString();
+
+      const names = { main: 'Main', little_one: 'Little One' };
+
+      for (const [gh, h] of Object.entries(healthMap)) {
+        const o = h.overall || {};
+        let emoji = '🟢';
+        let label = 'OK';
+
+        if (!o.mqtt_ok || !o.sensors_fresh || !o.vents_ok || !o.irrigation_ok) {
+          emoji = '🟡';
+          label = 'Degraded';
+        }
+        if (!o.mqtt_ok) {
+          emoji = '🔴';
+          label = 'Critical';
+        }
+
+        const chip = document.createElement('div');
+        chip.className = 'health-chip';
+        chip.innerHTML = `<span>${emoji}</span><span>${names[gh]}</span><span class="small">${label}</span>`;
+        list.appendChild(chip);
+      }
+    }
+
+    function updateState(data, caps) {
+      const s = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = val;
+      };
+
+      s('t_z1', data.t_z1 != null ? data.t_z1.toFixed(1) + ' °F' : '--');
+      s('h_z1', data.h_z1 != null ? data.h_z1.toFixed(0) + ' %' : '--');
+      s('t_z2', data.t_z2 != null ? data.t_z2.toFixed(1) + ' °F' : '--');
+      s('h_z2', data.h_z2 != null ? data.h_z2.toFixed(0) + ' %' : '--');
+      s('t_out', data.t_out != null ? data.t_out.toFixed(1) + ' °F' : '--');
+      s('h_out', data.h_out != null ? data.h_out.toFixed(0) + ' %' : '--');
+      s('light', data.light != null ? data.light : '--');
+
+      for (let v = 1; v <= caps.vents; v++) {
+        s(`vent${v}_state_tag`, `V${v}: ${data.vent_states?.[v-1] || '--'}`);
+      }
+
+      if (caps.has_presence) {
+        s('presence', data.presence === 1 ? 'Detected' : 'None');
+      }
+
+      const sm = data.irrigation_sm || {};
+      s('irrigation_state', sm.state || '--');
+      s('irrigation_zone', sm.zone != null ? sm.zone + 1 : '--');
+
+      for (let i = 1; i <= caps.irrigation_zones; i++) {
+        s(`moisture_z${i}`, data.moisture?.[i-1] ?? '--');
+      }
+
+      if (caps.has_lighting) {
+        s('lights_state_tag', data.lights_state || '--');
+
+        const today = new Date().toISOString().slice(0, 10);
+        const dlm = data.daily_light_minutes || {};
+        s('light_minutes_today', (dlm[today] || 0) + ' min');
+
+        const target = (data.config?.lighting?.daily_target_hours || 0) * 60;
+        s('light_minutes_target', target + ' min');
+      }
+
+      if (caps.has_camera) {
+        const img = document.getElementById('cam_live_img');
+      if (img) {
+        const gh = ghSelect.value;
+        img.src = `/api/camera/live?gh=${encodeURIComponent(gh)}&t=${Date.now()}`;
+        }
+      }
+
+      if (caps.has_weather) {
+        const wf = data.weather || {};
+        const daily = wf.daily || [];
+        const today = daily[0];
+
+        s('weather-updated', wf.updated ? new Date(wf.updated).toLocaleTimeString() : '--');
+
+        if (today) {
+          s('w_temp_minmax', `${today.temp_min.toFixed(1)} / ${today.temp_max.toFixed(1)} °F`);
+          s('w_hum_minmax', `${today.humidity_min.toFixed(0)} / ${today.humidity_max.toFixed(0)} %`);
+          s('w_clouds_avg', `${today.clouds_avg.toFixed(0)} %`);
+          s('w_pop_max', `${Math.round(today.pop_max * 100)} %`);
+        }
+      }
+    }
+
+    async function refresh() {
+      const gh = ghSelect.value;
+
+      const caps = await fetchCaps(gh);
+      buildLayout(caps.capabilities);
+
+      const [state, health] = await Promise.all([
+        fetchState(gh),
+        fetchHealth(gh)
+      ]);
+
+      updateState(state, caps.capabilities);
+
+      const allHealth = await fetchAllHealth();
+      updateOverview(allHealth);
+    }
+
+    ghSelect.addEventListener('change', refresh);
+
+    refresh();
+    setInterval(refresh, 10000);
+    setInterval(updateSystemHealth, 10000);
+    updateSystemHealth();
+    setInterval(updateSystemHealthSummary, 10000);
+    updateSystemHealthSummary();
+  </script>
+</body>
+</html>

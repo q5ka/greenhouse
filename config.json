@@ -1,0 +1,176 @@
+{
+  "greenhouses": {
+    "main": {
+      "name": "Main Greenhouse",
+      "capabilities": {
+        "vents": 2,
+        "irrigation_zones": 8,
+        "has_presence": true,
+        "has_lighting": true,
+        "has_weather": true,
+        "has_camera": true
+      },
+
+      "vent": {
+        "zone1": { "open_temp": 80, "close_temp": 72, "delta_outside": 2, "auto": true },
+        "zone2": { "open_temp": 80, "close_temp": 72, "delta_outside": 2, "auto": true }
+      },
+
+      "irrigation": {
+        "thresholds":  [500,500,500,500,500,500,500,500],
+        "durations":   [120,120,120,120,120,120,120,120],
+        "auto":        [true,true,true,true,true,true,true,true],
+        "moisture_low_warning": 400,
+        "moisture_low_critical": 300,
+        "moisture_high_warning": 800,
+        "moisture_high_critical": 900
+      },
+
+      "climate_thresholds": {
+        "temp_low_warning": 60,
+        "temp_low_critical": 50,
+        "temp_high_warning": 85,
+        "temp_high_critical": 95,
+        "humidity_low_warning": 30,
+        "humidity_low_critical": 20,
+        "humidity_high_warning": 80,
+        "humidity_high_critical": 90
+      },
+
+      "presence": {
+        "warning_minutes": 30,
+        "critical_minutes": 120,
+        "cooldown_minutes": 10
+      },
+
+      "lighting": {
+        "brightness_threshold": 2000,
+        "daily_target_hours": 9,
+        "allowed_start": "06:00",
+        "allowed_end": "22:00",
+        "max_supplemental_hours": 6
+      },
+
+      "weather": {
+        "api_key": "YOUR_OPENWEATHERMAP_KEY",
+        "lat": 35.8804,
+        "lon": -84.5088
+      },
+
+      "weather_logic": {
+        "hot_day_temp": 90,
+        "pre_cool_margin_deg": 2,
+        "storm_pop_threshold": 0.7,
+        "high_wind_speed": 20,
+        "rain_delay_hours": 6,
+        "rain_pop_threshold": 0.6,
+        "cloudy_clouds_threshold": 70
+      },
+
+      "camera": {
+        "enabled": true,
+        "esp32_ip": "192.168.1.50",
+        "mode": "live_timelapse_motion",
+        "snapshot_interval": 60,
+        "motion_sensitivity": 0.25,
+        "record_duration": 10,
+        "storage_path": "/data/camera/main",
+        "use_pir_mqtt": true,
+        "use_software_motion": true
+      },
+
+      "notifications": {
+        "email": {
+          "enabled": false,
+          "to": "you@example.com",
+          "smtp": {
+            "host": "smtp.example.com",
+            "port": 587,
+            "user": "smtp-user@example.com",
+            "password": "YOUR_SMTP_PASSWORD",
+            "use_tls": true
+          }
+        },
+        "sms": {
+          "enabled": false,
+          "to": "+15551234567"
+        }
+      }
+    },
+
+    "little_one": {
+      "name": "Little One",
+      "capabilities": {
+        "vents": 0,
+        "irrigation_zones": 4,
+        "has_presence": false,
+        "has_lighting": true,
+        "has_weather": true,
+        "has_camera": false
+      },
+
+      "irrigation": {
+        "thresholds":  [500,500,500,500],
+        "durations":   [120,120,120,120],
+        "auto":        [true,true,true,true],
+        "moisture_low_warning": 400,
+        "moisture_low_critical": 300,
+        "moisture_high_warning": 800,
+        "moisture_high_critical": 900
+      },
+
+      "climate_thresholds": {
+        "temp_low_warning": 60,
+        "temp_low_critical": 50,
+        "temp_high_warning": 85,
+        "temp_high_critical": 95,
+        "humidity_low_warning": 30,
+        "humidity_low_critical": 20,
+        "humidity_high_warning": 80,
+        "humidity_high_critical": 90
+      },
+
+      "lighting": {
+        "brightness_threshold": 2000,
+        "daily_target_hours": 9,
+        "allowed_start": "06:00",
+        "allowed_end": "22:00",
+        "max_supplemental_hours": 6
+      },
+
+      "weather": {
+        "api_key": "YOUR_OPENWEATHERMAP_KEY",
+        "lat": 35.8804,
+        "lon": -84.5088
+      },
+
+      "weather_logic": {
+        "hot_day_temp": 90,
+        "pre_cool_margin_deg": 2,
+        "storm_pop_threshold": 0.7,
+        "high_wind_speed": 20,
+        "rain_delay_hours": 6,
+        "rain_pop_threshold": 0.6,
+        "cloudy_clouds_threshold": 70
+      },
+
+      "notifications": {
+        "email": {
+          "enabled": false,
+          "to": "you@example.com",
+          "smtp": {
+            "host": "smtp.example.com",
+            "port": 587,
+            "user": "smtp-user@example.com",
+            "password": "YOUR_SMTP_PASSWORD",
+            "use_tls": true
+          }
+        },
+        "sms": {
+          "enabled": false,
+          "to": "+15551234567"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,228 @@
+/* ===========================
+   Modal Overlay
+   =========================== */
+#media-viewer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+/* ===========================
+   Modal Container
+   =========================== */
+#media-viewer-modal {
+  width: 80vw;
+  height: 80vh;
+  background: #0f172a;
+  border: 1px solid #1e293b;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 0 40px rgba(0,0,0,0.5);
+  animation: fadeIn 0.25s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* ===========================
+   Header
+   =========================== */
+#media-viewer-header {
+  padding: 12px 16px;
+  background: #020617;
+  border-bottom: 1px solid #1e293b;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+#media-viewer-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+#media-viewer-close {
+  cursor: pointer;
+  font-size: 1.4rem;
+  color: #94a3b8;
+  transition: color 0.2s;
+}
+
+#media-viewer-close:hover {
+  color: #22c55e;
+}
+
+/* ===========================
+   Tabs
+   =========================== */
+#media-viewer-tabs {
+  display: flex;
+  border-bottom: 1px solid #1e293b;
+}
+
+.media-tab {
+  padding: 10px 16px;
+  cursor: pointer;
+  color: #94a3b8;
+  font-size: 0.9rem;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+}
+
+.media-tab.active {
+  color: #22c55e;
+  border-bottom: 2px solid #22c55e;
+}
+
+/* ===========================
+   Content Area
+   =========================== */
+#media-viewer-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+/* ===========================
+   Time-lapse Grid
+   =========================== */
+#timelapse-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 10px;
+}
+
+.timelapse-thumb {
+  width: 100%;
+  height: 110px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #1e293b;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.timelapse-thumb:hover {
+  transform: scale(1.03);
+  border-color: #22c55e;
+}
+
+/* ===========================
+   Lightbox
+   =========================== */
+#lightbox-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+}
+
+#lightbox-container {
+  position: relative;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow: hidden;
+}
+
+#lightbox-img {
+  max-width: 100%;
+  max-height: 100%;
+  transform-origin: center center;
+  transition: transform 0.2s ease-out;
+}
+
+/* Lightbox Controls */
+.lightbox-controls {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 12px;
+}
+
+.lightbox-btn {
+  background: #0f172a;
+  border: 1px solid #1e293b;
+  color: #22c55e;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background 0.2s;
+}
+
+.lightbox-btn:hover {
+  background: #1e293b;
+}
+
+/* Slide Transition */
+.slide-left {
+  animation: slideLeft 0.25s ease-out;
+}
+
+.slide-right {
+  animation: slideRight 0.25s ease-out;
+}
+
+@keyframes slideLeft {
+  from { transform: translateX(40px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideRight {
+  from { transform: translateX(-40px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+/* ===========================
+   Motion Clip List
+   =========================== */
+.motion-item {
+  padding: 10px;
+  border: 1px solid #1e293b;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.motion-item:hover {
+  border-color: #22c55e;
+}
+
+.motion-item span {
+  color: #e2e8f0;
+}
+
+/* Video Player */
+#motion-video-container {
+  margin-top: 16px;
+}
+
+#motion-video {
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid #1e293b;
+}
+
+/* Mobile */
+@media (max-width: 700px) {
+  #media-viewer-modal {
+    width: 100vw;
+    height: 100vh;
+    border-radius: 0;
+  }
+}
