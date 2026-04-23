@@ -298,23 +298,21 @@ class CameraManager:
         normalized_rel = self._validate_rel_media_path(rel_path, (".mp4",))
         if not normalized_rel:
             return None
-        base_dir = os.path.join(cc.storage_path, "motion")
-        full_path = self._safe_join_under(base_dir, normalized_rel)
-        if not full_path:
-            return None
 
+        base_dir = os.path.join(cc.storage_path, "motion")
         base_real = os.path.realpath(base_dir)
-        full_real = os.path.realpath(full_path)
+        candidate_real = os.path.realpath(os.path.join(base_real, normalized_rel))
+
         try:
-            if os.path.commonpath([base_real, full_real]) != base_real:
+            if os.path.commonpath([base_real, candidate_real]) != base_real:
                 return None
         except ValueError:
             return None
 
-        if not os.path.isfile(full_real):
+        if not os.path.isfile(candidate_real):
             return None
         try:
-            with open(full_real, "rb") as f:
+            with open(candidate_real, "rb") as f:
                 return f.read()
         except Exception:
             return None
