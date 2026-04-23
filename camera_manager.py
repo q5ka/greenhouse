@@ -4,6 +4,7 @@ import io
 import time
 import threading
 import datetime
+import re
 from typing import Dict, Optional, List
 import requests
 import cv2
@@ -40,6 +41,24 @@ class CameraManager:
         except ValueError:
             return None
         return target_real
+
+    def _validate_rel_media_path(self, rel_path: str, exts: tuple) -> Optional[str]:
+        normalized_rel = os.path.normpath(rel_path).replace("\\", "/")
+        if (
+            not normalized_rel
+            or normalized_rel in (".", "..")
+            or os.path.isabs(normalized_rel)
+            or normalized_rel.startswith("../")
+            or "/../" in normalized_rel
+            or normalized_rel.startswith("/")
+        ):
+            return None
+        if not re.fullmatch(r"[A-Za-z0-9_\-./]+", normalized_rel):
+            return None
+        if not normalized_rel.lower().endswith(exts):
+            return None
+        return normalized_rel
+
     def __init__(self, config: Dict[str, dict]):
         self.configs: Dict[str, CameraConfig] = {}
         self.timelapse_threads: Dict[str, threading.Thread] = {}
@@ -209,16 +228,8 @@ class CameraManager:
             return None
         if not rel_path:
             return None
-        normalized_rel = os.path.normpath(rel_path).replace("\\", "/")
-        if (
-            os.path.isabs(normalized_rel)
-            or normalized_rel.startswith("../")
-            or normalized_rel == ".."
-            or "/../" in normalized_rel
-            or normalized_rel.startswith("/")
-        ):
-            return None
-        if not normalized_rel.lower().endswith((".jpg", ".jpeg")):
+        normalized_rel = self._validate_rel_media_path(rel_path, (".jpg", ".jpeg"))
+        if not normalized_rel:
             return None
         base_dir = os.path.join(cc.storage_path, "timelapse")
         full_path = self._safe_join_under(base_dir, normalized_rel)
@@ -253,16 +264,8 @@ class CameraManager:
             return None
         if not rel_path:
             return None
-        normalized_rel = os.path.normpath(rel_path).replace("\\", "/")
-        if (
-            os.path.isabs(normalized_rel)
-            or normalized_rel.startswith("../")
-            or normalized_rel == ".."
-            or "/../" in normalized_rel
-            or normalized_rel.startswith("/")
-        ):
-            return None
-        if not normalized_rel.lower().endswith(".mp4"):
+        normalized_rel = self._validate_rel_media_path(rel_path, (".mp4",))
+        if not normalized_rel:
             return None
         base_dir = os.path.join(cc.storage_path, "motion")
         full_path = self._safe_join_under(base_dir, normalized_rel)
